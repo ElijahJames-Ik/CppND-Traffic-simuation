@@ -84,17 +84,17 @@ void TrafficLight::cycleThroughPhases()
     std::uniform_int_distribution<int> distributor(4,6);
     auto randomGen = std::bind(distributor,engine);
     int randomNum = randomGen();
-    auto startTime = std::chrono::high_resolution_clock::now();
+    auto startTime = std::chrono::steady_clock::now();
     while(true)
     {
-        auto timeNow = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elasped = timeNow - startTime;
-        if(elasped.count() > randomNum)
+        auto timeNow = std::chrono::steady_clock::now();
+        int64_t elaspedTime = std::chrono::duration_cast<std::chrono::seconds>(timeNow - startTime).count();
+        if(elaspedTime > randomNum)
         {
              auto state = _currentPhase == TrafficLightPhase::green ? TrafficLightPhase::red : TrafficLightPhase::green;
             _currentPhase = state;
             _msgQueue.send(std::move(state));
-            startTime = std::chrono::high_resolution_clock::now();
+            startTime = std::chrono::steady_clock::now();
             randomNum = randomGen();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
